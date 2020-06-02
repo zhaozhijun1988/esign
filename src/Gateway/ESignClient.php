@@ -59,7 +59,9 @@ class ESignClient
 
     private $logger;
 
-    public function __construct(string $gateway, string $appId, string $secret, CacheInterface $cache, LoggerInterface $logger, $ttl = 0.6, string $key = 'esigntoken')
+    private $retryTimes;
+
+    public function __construct(string $gateway, string $appId, string $secret, CacheInterface $cache, LoggerInterface $logger, $ttl = 0.6, string $key = 'esigntoken', int $retryTimes = 3)
     {
         $this->client = new Client([
             'base_uri' => $gateway,
@@ -79,6 +81,7 @@ class ESignClient
         $this->cache = $cache;
         $this->key = $key;
         $this->ttl = $ttl;
+        $this->retryTimes = $retryTimes;
         $this->logger = $logger;
     }
 
@@ -216,11 +219,9 @@ class ESignClient
 
 
     public function createFlow(FlowRequest $request) {
-        $this->logger->error(json_encode($request));
         $response = $this->request('post', '/api/v2/signflows/createFlowOneStep', [
             'json' =>  $request
         ]);
-        $this->logger->error(json_encode($response));
         return $response["flowId"];
     }
 
@@ -308,8 +309,8 @@ class ESignClient
      */
     public function getAccessToken(bool $force = false)
     {
-        if ($token = $this->cache->get($this->key) && !$force) {
-            return $token;
+        if ($this->cache->get($this->key) && !$force) {
+            return $this->cache->get($this->key);
         }
 
         $token = $this->doGetAccessToken();
@@ -355,7 +356,7 @@ class ESignClient
             if ($response->getCode() != Response::OK)
                 throw new  ESignException($response->getMessage());
             return $response->getData();
-        }, 1);
+        }, $this->retryTimes);
 
     }
 

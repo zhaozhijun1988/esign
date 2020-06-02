@@ -75,7 +75,6 @@ class SignFiled implements \JsonSerializable
      */
     private $thirdOrderNo;
 
-
     /**
      * @return bool|null
      */
@@ -86,14 +85,16 @@ class SignFiled implements \JsonSerializable
 
     /**
      * @param bool|null $autoExecute
+     * @return SignFiled
      */
-    public function setAutoExecute(?bool $autoExecute): void
+    public function setAutoExecute(?bool $autoExecute): SignFiled
     {
         $this->autoExecute = $autoExecute;
+        return $this;
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getActorIndentityType(): ?string
     {
@@ -101,11 +102,10 @@ class SignFiled implements \JsonSerializable
     }
 
     /**
-     * @param null|string $actorIndentityType
-     *
+     * @param string|null $actorIndentityType
      * @return SignFiled
      */
-    public function setActorIndentityType(?string $actorIndentityType): self
+    public function setActorIndentityType(?string $actorIndentityType): SignFiled
     {
         $this->actorIndentityType = $actorIndentityType;
         return $this;
@@ -121,17 +121,16 @@ class SignFiled implements \JsonSerializable
 
     /**
      * @param string $fileId
-     *
      * @return SignFiled
      */
-    public function setFileId(string $fileId): self
+    public function setFileId(string $fileId): SignFiled
     {
         $this->fileId = $fileId;
         return $this;
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getSealId(): ?string
     {
@@ -139,15 +138,17 @@ class SignFiled implements \JsonSerializable
     }
 
     /**
-     * @param null|string $sealId
+     * @param string|null $sealId
+     * @return SignFiled
      */
-    public function setSealId(?string $sealId): void
+    public function setSealId(?string $sealId): SignFiled
     {
         $this->sealId = $sealId;
+        return $this;
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getSealType(): ?string
     {
@@ -155,11 +156,13 @@ class SignFiled implements \JsonSerializable
     }
 
     /**
-     * @param null|string $sealType
+     * @param string|null $sealType
+     * @return SignFiled
      */
-    public function setSealType(?string $sealType): void
+    public function setSealType(?string $sealType): SignFiled
     {
         $this->sealType = $sealType;
+        return $this;
     }
 
     /**
@@ -172,13 +175,47 @@ class SignFiled implements \JsonSerializable
 
     /**
      * @param int|null $signType
-     *
      * @return SignFiled
      */
     public function setSignType(?int $signType): SignFiled
     {
         $this->signType = $signType;
+        return $this;
+    }
 
+    /**
+     * @return PosBean|null
+     */
+    public function getPosBean(): ?PosBean
+    {
+        return $this->posBean;
+    }
+
+    /**
+     * @param PosBean|null $posBean
+     * @return SignFiled
+     */
+    public function setPosBean(?PosBean $posBean): SignFiled
+    {
+        $this->posBean = $posBean;
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWidth(): ?int
+    {
+        return $this->width;
+    }
+
+    /**
+     * @param int|null $width
+     * @return SignFiled
+     */
+    public function setWidth(?int $width): SignFiled
+    {
+        $this->width = $width;
         return $this;
     }
 
@@ -219,24 +256,6 @@ class SignFiled implements \JsonSerializable
     }
 
     /**
-     * @return PosBean|null
-     */
-    public function getPosBean(): ?PosBean
-    {
-        return $this->posBean;
-    }
-
-    /**
-     * @param PosBean|null $posBean
-     * @return SignFiled
-     */
-    public function setPosBean(?PosBean $posBean): SignFiled
-    {
-        $this->posBean = $posBean;
-        return $this;
-    }
-
-    /**
      * @return string|null
      */
     public function getThirdOrderNo(): ?string
@@ -251,24 +270,6 @@ class SignFiled implements \JsonSerializable
     public function setThirdOrderNo(?string $thirdOrderNo): SignFiled
     {
         $this->thirdOrderNo = $thirdOrderNo;
-        return $this;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getWidth(): ?int
-    {
-        return $this->width;
-    }
-
-    /**
-     * @param int|null $width
-     * @return SignFiled
-     */
-    public function setWidth(?int $width): SignFiled
-    {
-        $this->width = $width;
         return $this;
     }
 

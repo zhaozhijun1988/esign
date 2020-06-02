@@ -19,7 +19,7 @@ class Response
     private $message;
 
     /**
-     * @var $data array
+     * @var $data array | bool
      */
     private $data;
 
@@ -60,22 +60,23 @@ class Response
     }
 
     /**
-     * @return array
+     * @return array|bool
      */
-    public function getData():? array
+    public function getData()
     {
         return $this->data;
     }
 
     /**
-     * @param array $data
+     * @param array|bool $data
      * @return Response
      */
-    public function setData( $data): Response
+    public function setData($data)
     {
         $this->data = $data;
         return $this;
     }
+
 
 
 }
