@@ -31,7 +31,7 @@ class SignFiled implements \JsonSerializable
     private $actorIndentityType;
 
     /**
-     * @var $fileId string
+     * @var $fileId string | null
      */
     private $fileId;
 
@@ -112,22 +112,23 @@ class SignFiled implements \JsonSerializable
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFileId(): string
+    public function getFileId(): ?string
     {
         return $this->fileId;
     }
 
     /**
-     * @param string $fileId
+     * @param string|null $fileId
      * @return SignFiled
      */
-    public function setFileId(string $fileId): SignFiled
+    public function setFileId(?string $fileId): SignFiled
     {
         $this->fileId = $fileId;
         return $this;
     }
+
 
     /**
      * @return string|null

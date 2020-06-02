@@ -360,6 +360,10 @@ class ESignClient
 
     }
 
+    public function deserialize($data, $class, $format)
+    {
+        return $this->serializer->deserialize($data, $class, $format);
+    }
 
     public function retry(callable $fn, int $times)
     {
