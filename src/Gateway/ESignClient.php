@@ -59,7 +59,7 @@ class ESignClient
 
     private $logger;
 
-    public function __construct(string $gateway, string $appId, string $secret, CacheInterface $cache, LoggerInterface $logger, $ttl = 0.6, string $key = 'esign.344token')
+    public function __construct(string $gateway, string $appId, string $secret, CacheInterface $cache, LoggerInterface $logger, $ttl = 0.6, string $key = 'esigntoken')
     {
         $this->client = new Client([
             'base_uri' => $gateway,
@@ -132,6 +132,21 @@ class ESignClient
     {
         $res = $this->request('get', sprintf("/v1/organizations/%s", $orgId));
         return $this->serializer->denormalize($res, Organization::class);
+    }
+
+    public function grantSignAuth(string $accountId, \DateTimeImmutable $immutable = null)
+    {
+        $response = $this->request('post', sprintf("/v1/signAuth/%s", $accountId), [
+            'json' => array_filter([
+                'deadline' => $immutable ? $immutable->format('Y-m-d H:i:s') : null
+            ])
+        ]);
+        return $response;
+    }
+
+    public function removeSignAuth(string $accountId)
+    {
+        return $this->request('delete', sprintf("/v1/signAuth/%s", $accountId));
     }
 
     /**
@@ -220,13 +235,13 @@ class ESignClient
         return $response === null;
     }
 
-    public function findSignUrl(string $flowId, string $accountId)
+    public function findSignUrl(string $flowId, string $accountId, string  $appScheme, string $urlType = 0)
     {
         $response = $this->request('get', sprintf("/v1/signflows/%s/executeUrl", $flowId), [
             'query' => [
                 'accountId' => $accountId,
-                'urlType' => 0,
-                'appScheme' => 'jmymerchant://esign/signBack'
+                'urlType' => $urlType,
+                'appScheme' => $appScheme
             ]
         ]);
         return $response;
@@ -283,16 +298,17 @@ class ESignClient
     }
 
 
-
     /**
-     * @return AccessToken|mixed|object|string
+     * @param bool $force
+     * @return array|bool|object
      * @throws ESignException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
-    public function getAccessToken()
+    public function getAccessToken(bool $force = false)
     {
-        if ($token = $this->cache->get($this->key)) {
+        if ($token = $this->cache->get($this->key) && !$force) {
             return $token;
         }
 
@@ -302,8 +318,9 @@ class ESignClient
     }
 
     /**
-     * @return AccessToken|object
+     * @return array|object
      * @throws ESignException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
     private function doGetAccessToken()
@@ -324,20 +341,39 @@ class ESignClient
 
     public function request(string $method, string $uri, array $options = [])
     {
-        $res = $this->client->request($method, $uri, array_merge(
-            [
-                'headers' => ['X-Tsign-Open-App-Id' => $this->appId, 'X-Tsign-Open-Token' => $this->getAccessToken(), 'Content-Type' => 'application/json'],
-            ], $options
-        ));
-        $content = $res->getBody()->getContents();
-        /**
-         * @var $response Response
-         */
-        $response = $this->serializer->deserialize($content, Response::class, 'json');
-        if ($response->getCode() != Response::OK)
-            throw new  ESignException($response->getMessage());
-        return $response->getData();
+        return $this->retry(function() use ($method, $uri, $options) {
+            $res = $this->client->request($method, $uri, array_merge(
+                [
+                    'headers' => ['X-Tsign-Open-App-Id' => $this->appId, 'X-Tsign-Open-Token' => $this->getAccessToken(), 'Content-Type' => 'application/json'],
+                ], $options
+            ));
+            $content = $res->getBody()->getContents();
+            /**
+             * @var $response Response
+             */
+            $response = $this->serializer->deserialize($content, Response::class, 'json');
+            if ($response->getCode() != Response::OK)
+                throw new  ESignException($response->getMessage());
+            return $response->getData();
+        }, 1);
 
+    }
+
+
+    public function retry(callable $fn, int $times)
+    {
+        beginning:
+        try {
+            return $fn();
+        }catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            if (!$times) {
+                throw new \Exception('retry reach max times');
+            }
+            $times--;
+            $this->getAccessToken(true);
+            goto beginning;
+        }
     }
 
 
