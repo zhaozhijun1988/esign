@@ -235,7 +235,7 @@ class ESignClient
         return $response === null;
     }
 
-    public function findSignUrl(string $flowId, string $accountId, string  $appScheme, string $urlType = 0)
+    public function findSignUrl(string $flowId, string $accountId, string  $appScheme, int $urlType = 0)
     {
         $response = $this->request('get', sprintf("/v1/signflows/%s/executeUrl", $flowId), [
             'query' => [
